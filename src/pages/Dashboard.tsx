@@ -118,7 +118,12 @@ export function Dashboard() {
       </form>
       <div className="mb-8 max-h-96 overflow-y-auto">
         {REFUND_ITEMS.map((item) => (
-          <RefundItem data={item} key={item.id} {...item} />
+          <RefundItem
+            data={item}
+            key={item.id}
+            {...item}
+            href={`/refund/${item.id}`}
+          />
         ))}
       </div>
 

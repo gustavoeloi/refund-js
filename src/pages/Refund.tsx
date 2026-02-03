@@ -1,8 +1,10 @@
 import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useNavigate } from "react-router";
+import { file, z } from "zod";
+import { useNavigate, useParams } from "react-router";
+
+import fileSvg from "../assets/file.svg";
 
 import { Input } from "../components/Input";
 import { Select } from "../components/Select";
@@ -10,6 +12,10 @@ import { Upload } from "../components/Upload";
 import { Button } from "../components/Button";
 
 import { CATEGORIES } from "../utils/categories";
+
+type Props = React.ComponentProps<"form"> & {
+  isLoading?: boolean;
+};
 
 const formSchema = z.object({
   name: z.string().min(3, "O nome deve ter no mínimo 3 caracteres"),
@@ -20,24 +26,40 @@ const formSchema = z.object({
 
 type FormSchemaType = z.infer<typeof formSchema>;
 
-export function Refund() {
+export function Refund({ isLoading }: Props) {
+  const navigate = useNavigate();
+  const params = useParams<{ id: string }>();
+  let defaultValues: FormSchemaType;
+
+  if (params.id) {
+    defaultValues = {
+      name: "Trip to NYC",
+      category: "travel",
+      amount: 1200.5,
+    };
+  } else {
+    defaultValues = {
+      name: "",
+      category: "",
+      amount: 0,
+    };
+  }
+
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema) as Resolver<FormSchemaType>,
-    defaultValues: {
-      name: "",
-      category: "",
-      amount: 0,
-    },
+    defaultValues,
   });
-  const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<FormSchemaType> = (data) => {
-    console.log(data);
     navigate("/confirm", { state: { fromRefund: true } });
+
+    if (params.id) {
+      return navigate("/manager", { replace: true });
+    }
   };
 
   return (
@@ -54,6 +76,7 @@ export function Refund() {
       <Controller
         name="name"
         control={control}
+        disabled={!!params.id}
         render={({ field }) => (
           <Input {...field} legend="Nome da solicitação" />
         )}
@@ -65,6 +88,7 @@ export function Refund() {
         <Controller
           name="category"
           control={control}
+          disabled={!!params.id}
           render={({ field }) => (
             <Select {...field} legend="Category">
               {Object.entries(CATEGORIES).map(([key, category]) => (
@@ -79,6 +103,7 @@ export function Refund() {
         <Controller
           name="amount"
           control={control}
+          disabled={!!params.id}
           render={({ field }) => (
             <Input {...field} legend="Amount" type="number" min={0} />
           )}
@@ -90,28 +115,51 @@ export function Refund() {
       {errors.amount && (
         <p className="text-xs text-red-500">{errors.amount.message}</p>
       )}
-      <Controller
-        name="file"
-        control={control}
-        render={({ field }) => (
-          <Upload
-            name={field.name}
-            onBlur={field.onBlur}
-            onChange={(e: any) => {
-              const file = e?.target?.files
-                ? e.target.files[0]
-                : e instanceof File
-                  ? e
-                  : undefined;
-              field.onChange(file);
-            }}
-            fileName={field.value?.name ?? null}
-            legend="Payment Receipt"
-            type="file"
-          />
-        )}
-      />
-      <Button type="submit">Submit Refund</Button>
+
+      {params.id && (
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-sm  text-blue-400 mb-4">
+            Receipt already uploaded. To change the receipt, please create a new
+            refund request.
+          </p>
+          <a
+            href="#"
+            className="text-sm font-bold text-green-200  hover:underline flex gap-2"
+          >
+            <img src={fileSvg} alt="file Icon" />
+            Open Existing Receipt
+          </a>
+        </div>
+      )}
+
+      {!params.id && (
+        <Controller
+          name="file"
+          control={control}
+          disabled={!!params.id}
+          render={({ field }) => (
+            <Upload
+              name={field.name}
+              onBlur={field.onBlur}
+              onChange={(e: any) => {
+                const file = e?.target?.files
+                  ? e.target.files[0]
+                  : e instanceof File
+                    ? e
+                    : undefined;
+                field.onChange(file);
+              }}
+              fileName={field.value?.name ?? null}
+              legend="Payment Receipt"
+              type="file"
+            />
+          )}
+        />
+      )}
+
+      <Button type="submit" isLoading={isLoading}>
+        {params.id ? "Update Request" : "Submit Request"}
+      </Button>
     </form>
   );
 }
