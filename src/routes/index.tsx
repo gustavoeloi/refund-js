@@ -8,12 +8,15 @@ import { EmployeeRoutes } from "./employee-routes";
 
 const isLoading = true;
 
+<<<<<<< HEAD
 const session = {
   user: {
     role: "manager", // Possible values: 'manager', 'employee'
   },
 };
 
+=======
+>>>>>>> 812237dd378d791204e2503ddabdd29da1f05158
 export function Routes() {
   function Route() {
     switch (session.user.role) {
@@ -31,8 +34,12 @@ export function Routes() {
   }
 
   return (
+<<<<<<< HEAD
     <BrowserRouter>
       <Route />
     </BrowserRouter>
+=======
+    <BrowserRouter>{isLoading ? <Loading /> : <AuthRoutes />}</BrowserRouter>
+>>>>>>> 812237dd378d791204e2503ddabdd29da1f05158
   );
 }
