@@ -13,6 +13,8 @@ import { CATEGORIES } from "../utils/categories";
 import Search from "../assets/search.svg";
 import LeftArrow from "../assets/left.svg";
 import RightArrow from "../assets/right.svg";
+import { Pagination } from "../components/Pagination";
+import { useState } from "react";
 
 const bodySchema = z.object({
   query: z.string().min(3).max(255).optional(),
@@ -25,50 +27,50 @@ const REFUND_ITEMS: RefundItemsProps[] = [
     id: "1",
     title: "Refund Request #1234",
     subtitle: "Food expenses - Submitted on: 2024-06-15",
-    value: "R$ 35,95",
-    categoryImg: CATEGORIES["food"].icon,
+    value: 35.95,
+    categoryimg: CATEGORIES["food"].icon,
   },
   {
     id: "2",
     title: "Refund Request #5678",
     subtitle: "Transport expenses - Submitted on: 2024-06-16",
-    value: "R$ 29,95",
-    categoryImg: CATEGORIES["transport"].icon,
+    value: 29.95,
+    categoryimg: CATEGORIES["transport"].icon,
   },
   {
     id: "3",
     title: "Refund Request #9101",
     subtitle: "Accommodation expenses - Submitted on: 2024-06-17",
-    value: "R$ 552,95",
-    categoryImg: CATEGORIES["accommodation"].icon,
+    value: 552.95,
+    categoryimg: CATEGORIES["accommodation"].icon,
   },
   {
-    id: "3",
+    id: "4",
     title: "Refund Request #9101",
     subtitle: "Accommodation expenses - Submitted on: 2024-06-17",
-    value: "R$ 552,95",
-    categoryImg: CATEGORIES["accommodation"].icon,
+    value: 552.95,
+    categoryimg: CATEGORIES["accommodation"].icon,
   },
   {
-    id: "3",
+    id: "5",
     title: "Refund Request #9101",
     subtitle: "Accommodation expenses - Submitted on: 2024-06-17",
-    value: "R$ 552,95",
-    categoryImg: CATEGORIES["accommodation"].icon,
+    value: 356.2,
+    categoryimg: CATEGORIES["accommodation"].icon,
   },
   {
-    id: "3",
+    id: "6",
     title: "Refund Request #9101",
     subtitle: "Accommodation expenses - Submitted on: 2024-06-17",
-    value: "R$ 552,95",
-    categoryImg: CATEGORIES["accommodation"].icon,
+    value: 552.95,
+    categoryimg: CATEGORIES["accommodation"].icon,
   },
   {
-    id: "3",
+    id: "7",
     title: "Refund Request #9101",
     subtitle: "Accommodation expenses - Submitted on: 2024-06-17",
-    value: "R$ 552,95",
-    categoryImg: CATEGORIES["accommodation"].icon,
+    value: 552.95,
+    categoryimg: CATEGORIES["accommodation"].icon,
   },
 ];
 
@@ -77,7 +79,24 @@ export function Dashboard() {
     resolver: zodResolver(bodySchema),
   });
 
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(10);
+
   const onSubmit: SubmitHandler<inputSchema> = (data) => console.log(data);
+
+  function handlePagination(action: "next" | "previous") {
+    setPage((prevPage) => {
+      if (action === "next" && prevPage < totalPage) {
+        return prevPage + 1;
+      }
+
+      if (action === "previous" && prevPage > 1) {
+        return prevPage - 1;
+      }
+
+      return prevPage;
+    });
+  }
 
   return (
     <div className="bg-gray-500 md:min-w-3xl rounded-lg p-10">
@@ -102,15 +121,13 @@ export function Dashboard() {
           <RefundItem data={item} key={item.id} {...item} />
         ))}
       </div>
-      <div className="flex items-center justify-center gap-4">
-        <Button variant="icon">
-          <img src={LeftArrow} alt="Previous" />
-        </Button>
-        <span className="text-gray-100">1 of 3 </span>
-        <Button variant="icon">
-          <img src={RightArrow} alt="Next" />
-        </Button>
-      </div>
+
+      <Pagination
+        current={page}
+        total={totalPage}
+        onNext={() => handlePagination("next")}
+        onPrevious={() => handlePagination("previous")}
+      />
     </div>
   );
 }
