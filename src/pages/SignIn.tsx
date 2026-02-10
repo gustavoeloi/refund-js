@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { Toaster } from "react-hot-toast";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -74,6 +75,7 @@ export function SignIn() {
       >
         Sign up
       </a>
+      <Toaster position="bottom-right" />
     </form>
   );
 }

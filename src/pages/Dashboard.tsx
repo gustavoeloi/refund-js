@@ -11,8 +11,6 @@ import { RefundItem, type RefundItemsProps } from "../components/RefundItem";
 import { CATEGORIES } from "../utils/categories";
 
 import Search from "../assets/search.svg";
-import LeftArrow from "../assets/left.svg";
-import RightArrow from "../assets/right.svg";
 import { Pagination } from "../components/Pagination";
 import { useState } from "react";
 

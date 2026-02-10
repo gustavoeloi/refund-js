@@ -10,7 +10,7 @@ const isLoading = false;
 
 const session = {
   user: {
-    role: "employee", // Possible values: 'manager', 'employee'
+    role: "", // Possible values: 'manager', 'employee'
   },
 };
 

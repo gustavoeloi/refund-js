@@ -2,27 +2,37 @@ import { useForm, Controller } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import toast, { Toaster } from "react-hot-toast";
+import api from "../lib/api";
 
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
+import { useNavigate } from "react-router";
 
 const formSchema = z
   .object({
-    name: z.string().min(3, "Nome obrigatório"),
-    email: z.email("E-mail inválido"),
+    name: z.string().min(3, "Name is required"),
+    email: z.email("Invalid E-mail"),
     password: z
-      .string("Senha obrigatória")
-      .min(6, "O campo deve conter 6 caracteres"),
-    confirmPassword: z.string().min(6, "O campo deve conter 6 caracteres"),
+      .string("Password is required")
+      .min(6, "The field must contain at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "The field must contain at least 6 characters"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
+    message: "The password does not match",
     path: ["confirmPassword"],
   });
 
 type FormSchemaType = z.infer<typeof formSchema>;
 
 export function SignUp() {
+  const navigate = useNavigate();
+
+  const alertSuccess = () => toast.success("Usuário criado!");
+  const alertDenied = (message: string) => toast.error(message);
+
   const {
     control,
     handleSubmit,
@@ -37,7 +47,28 @@ export function SignUp() {
     },
   });
 
-  const onSubmit: SubmitHandler<FormSchemaType> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
+    try {
+      const { email, name, password } = data;
+
+      await api.post("/users", {
+        name,
+        email,
+        password,
+      });
+
+      alertSuccess();
+      navigate("/login");
+    } catch (error: any) {
+      if (error.response) {
+        const messageAPI = error.response.data.message;
+
+        alertDenied(messageAPI);
+      } else {
+        console.log("Erro: ", error.message);
+      }
+    }
+  };
 
   return (
     <form
@@ -112,6 +143,8 @@ export function SignUp() {
       >
         I already have an account
       </a>
+
+      <Toaster position="bottom-right" />
     </form>
   );
 }
