@@ -5,7 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import api from "../lib/api";
+import { useNavigate } from "react-router";
+import type { LoginResponse } from "../types/auth";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -17,6 +20,11 @@ const formSchema = z.object({
 type FormSchemaType = z.infer<typeof formSchema>;
 
 export function SignIn() {
+  const navigate = useNavigate();
+
+  const alertSuccess = () => toast.success("Login successsfuly!");
+  const alertDenied = (message: string) => toast.error(message);
+
   const {
     control,
     handleSubmit,
@@ -29,7 +37,27 @@ export function SignIn() {
     },
   });
 
-  const onSubmit: SubmitHandler<FormSchemaType> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
+    try {
+      const { email, password } = data;
+
+      const response = await api.post<LoginResponse>("/sessions", {
+        email,
+        password,
+      });
+
+      const { token } = response.data;
+
+      localStorage.setItem("refundjs:token", token);
+
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+
+      navigate("/refund");
+      alertSuccess();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <form
